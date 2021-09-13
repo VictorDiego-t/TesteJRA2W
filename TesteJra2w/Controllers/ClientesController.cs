@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using TesteJR.Dominio;
 using TesteJR.Repositorio;
-
 
 
 namespace TesteJR_A2W.Controllers
@@ -27,7 +27,9 @@ namespace TesteJR_A2W.Controllers
         [HttpGet]
         public ActionResult Get()
         {
-            var listCliente = _context.Cliente.ToList();
+            var listCliente = _context.Cliente
+                .Include(p => p.Enderecos)
+                .ToList();
             return Ok(listCliente);
         }
 
@@ -37,7 +39,9 @@ namespace TesteJR_A2W.Controllers
         [HttpGet("/buscar/{id:int}")]
         public ActionResult GetId(int id)
         {
-            var result = _context.Cliente.Find(id);
+            var result = _context.Cliente
+                .Include(p => p.Enderecos)
+                .FirstOrDefault(c => c.Id == id);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -46,35 +50,47 @@ namespace TesteJR_A2W.Controllers
         // Post Adicionar Cliente
 
         [HttpPost("/adicionar")]
-        public void Postnome([FromBody] string nome, string endereco)
+        public void Postnome([FromBody] Clientes cliente)
         {
-            var clientes = new Clientes { Nome = nome };
-            var clientes_endereco = new Enderecos { Endereco = endereco };
-            _context.Cliente.Add(clientes);
+            _context.Cliente.Add(cliente);
             _context.SaveChanges();
         }
 
 
         // POST adicionar endereco
 
-        [HttpPost("/adicionarendereco")]
-        public void Post([FromBody] string endereco)
-        {
-            {
-                var clientes_endereco = new Enderecos { Endereco = endereco};
-                _context.Endereco.Add(clientes_endereco);
-                _context.SaveChanges();
-            }
-        }
+        //[HttpPost("/adicionarendereco")]
+        //public void Post([FromBody] string endereco)
+        //{
+        //    {
+        //        var clientes_endereco = new Enderecos { Endereco = endereco};
+        //        _context.Endereco.Add(clientes_endereco);
+        //        _context.SaveChanges();
+        //    }
+        //}
 
 
         // PUT api/<ClientesController>/5
 
         [HttpPut("/atualizar")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(int id, [FromBody] Clientes value)
         {
-            var clienteid = _context.Cliente.Find(id);
-            clienteid.Nome = value;
+            var clienteid = _context.Cliente
+                .Include(p => p.Enderecos)
+                .FirstOrDefault(c => c.Id == id);
+
+           
+
+            foreach (var item in value.Enderecos)
+            {
+               var endereco = clienteid.Enderecos.Where(c => c.Id == item.Id).FirstOrDefault();
+                endereco.cep = item.cep;
+                endereco.Endereco = item.Endereco;
+
+
+            }
+
+            clienteid.Nome = value.Nome;
             _context.SaveChanges();
         }
 
@@ -83,7 +99,9 @@ namespace TesteJR_A2W.Controllers
         [HttpDelete("/delete")]
         public void Delete(int id)
         {
-            var clientedel = _context.Cliente.Find(id);
+            var clientedel = _context.Cliente
+                .Include(c => c.Enderecos)
+                .FirstOrDefault(c => c.Id == id);
             _context.Cliente.Remove(clientedel);
             _context.SaveChanges();
 

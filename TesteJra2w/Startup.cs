@@ -31,6 +31,15 @@ namespace TesteJra2w
             services.AddMvc();
             services.AddScoped<ClientesContext>();
 
+            services.AddCors(option =>
+            {
+                option.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TesteJra2w", Version = "v1" });
@@ -51,6 +60,8 @@ namespace TesteJra2w
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {

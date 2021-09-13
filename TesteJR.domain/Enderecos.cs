@@ -8,6 +8,6 @@
 
         public string cep { get; set; }
 
-        public Clientes Clientes { get; set; }
+       // public Clientes Clientes { get; set; }
     }
 }
