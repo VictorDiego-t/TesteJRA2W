@@ -81,12 +81,15 @@ namespace TesteJR_A2W.Controllers
             foreach (var item in value.Enderecos)
             {
                 var endereco = clienteid.Enderecos.Where(c => c.Id == item.Id).FirstOrDefault();
-                clienteid.Nome = value.Nome;
-                clienteid.Enderecos = value.Enderecos;
-                _context.SaveChanges();
+                
+                endereco.cep = item.cep;
+                endereco.Endereco = item.Endereco;
+                
 
             }
-
+            clienteid.Nome = value.Nome;
+           
+            _context.SaveChanges();
         }
 
 
